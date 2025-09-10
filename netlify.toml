@@ -1,0 +1,24 @@
+[build]
+  command = "cd frontend && npm install && npm run build"
+  publish = "frontend/dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  framework = "#custom"
+  targetPort = 3000
+  port = 8888
+  command = "cd frontend && npm run dev"
+  publish = "frontend/dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
+  CI = "false"
+
+[functions]
+  directory = "backend/functions"
+  node_bundler = "esbuild"

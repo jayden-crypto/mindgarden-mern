@@ -1,0 +1,22 @@
+{
+  "name": "mindgarden-mern",
+  "version": "1.0.0",
+  "description": "Mental health support platform with gamified wellness tracking",
+  "main": "server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "test": "cd backend && npm test",
+    "seed": "cd backend && npm run seed",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "keywords": ["mental-health", "wellness", "mern", "hackathon"],
+  "author": "MindGarden Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
