@@ -4,9 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: import.meta.env.PROD 
-    ? 'https://your-production-backend-url.com/api'  // Replace with your actual production backend URL
-    : 'http://localhost:5001/api', // Local development backend URL
+  baseURL: 'https://mindgarden-backend-production-0dab.up.railway.app/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
