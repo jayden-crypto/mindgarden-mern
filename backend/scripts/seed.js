@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 // Import models
@@ -14,6 +15,12 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mindgarde
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
+// Helper function to hash password
+const hashPassword = async (password) => {
+  const salt = await bcrypt.genSalt(12);
+  return await bcrypt.hash(password, salt);
+};
 
 const seedDatabase = async () => {
   try {
@@ -31,13 +38,20 @@ const seedDatabase = async () => {
 
     console.log('🧹 Cleared existing data');
 
-    // Create users
+    // Create users with plain text passwords - the User model's pre-save hook will handle hashing
     const users = await User.create([
       {
         name: 'Admin User',
         email: 'admin@mindgarden.com',
         password: 'password123',
         role: 'admin',
+        profile: {
+          age: 35,
+          gender: 'male',
+          bio: 'System administrator',
+          specialization: 'System Management',
+          experience: 10
+        },
         consentGiven: true,
         consentDate: new Date(),
         isActive: true
@@ -122,24 +136,25 @@ const seedDatabase = async () => {
         isActive: true
       },
       {
-        name: 'Jordan Smith',
+        name: 'Jordan Lee',
         email: 'jordan@mindgarden.com',
         password: 'password123',
         role: 'student',
         profile: {
           age: 21,
           gender: 'male',
-          university: 'Community College',
+          university: 'City College',
           course: 'Business Administration',
           year: 3
         },
         garden: {
-          level: 1,
-          points: 75,
-          streak: 1,
+          level: 4,
+          points: 350,
+          streak: 10,
           lastActivity: new Date(),
-          plants: [],
-          badges: []
+          plants: [
+            { type: 'tree', level: 3, unlockedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) }
+          ]
         },
         consentGiven: true,
         consentDate: new Date(),
