@@ -88,8 +88,8 @@ npm run dev
 ```
 
 7. **Access the application**
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5000
+- Frontend: http://localhost:3001
+- Backend API: http://localhost:5001
 
 ### Docker Development
 
