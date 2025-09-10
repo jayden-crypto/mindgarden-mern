@@ -30,7 +30,8 @@ app.use(helmet());
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
-      process.env.FRONTEND_URL,
+      'https://cozy-sprinkles-8053d7.netlify.app',
+      'https://mindgarden-backend-production-0dab.up.railway.app',
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:3002',
@@ -41,18 +42,22 @@ const corsOptions = {
       'http://127.0.0.1:5173',
       'http://localhost:5001',
       'http://127.0.0.1:5001',
-      'https://cozy-sprinkles-8053d7.netlify.app',
-      'https://*.netlify.app'
-    ].filter(Boolean);
+      'https://*.netlify.app',
+      'https://*.railway.app'
+    ];
     
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    // Allow all origins in development
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
     
-    // Check if the origin is in the allowed list or is a subdomain of an allowed domain
+    // In production, check against allowed origins
     const isAllowed = allowedOrigins.some(allowedOrigin => {
-      return origin === allowedOrigin || 
-             (allowedOrigin.includes('*') && 
-              origin.endsWith(allowedOrigin.split('*')[1]));
+      return (
+        origin === allowedOrigin ||
+        (allowedOrigin.includes('*') && 
+         origin.endsWith(allowedOrigin.split('*')[1]))
+      );
     });
     
     if (!isAllowed) {
