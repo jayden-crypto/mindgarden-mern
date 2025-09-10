@@ -4,6 +4,7 @@
   "description": "Mental health support platform with gamified wellness tracking",
   "main": "server.js",
   "scripts": {
+    "start": "cd backend && node server.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm run dev",
     "client": "cd frontend && npm run dev",
