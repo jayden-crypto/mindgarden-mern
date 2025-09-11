@@ -109,12 +109,38 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mindgarden', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch(err => console.error('MongoDB connection error:', err));
+console.log('Attempting to connect to MongoDB...');
+console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Provided' : 'Not provided');
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mindgarden', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000, // Increase timeout to 10 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      family: 4, // Use IPv4, skip trying IPv6
+    });
+    console.log('✅ MongoDB connected successfully');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err);
+    console.error('MongoDB URI used:', process.env.MONGODB_URI || 'mongodb://localhost:27017/mindgarden');
+    process.exit(1); // Exit with failure
+  }
+};
+
+// Handle MongoDB connection events
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected. Attempting to reconnect...');
+  connectDB();
+});
+
+// Initialize database connection
+connectDB();
 
 // API Routes with /api prefix
 app.use('/api/auth', authRoutes);
