@@ -14,7 +14,9 @@ export const useAuth = () => {
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'https://mindgarden-backend-production-0dab.up.railway.app/api',
+  baseURL: process.env.NODE_ENV === 'production'
+    ? 'https://mindgarden-backend-production-0dab.up.railway.app/api'
+    : 'http://localhost:5001/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
