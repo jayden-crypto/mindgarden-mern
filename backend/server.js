@@ -29,78 +29,12 @@ app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
-// CORS configuration
+// Simple CORS configuration for all routes (temporary for debugging)
 const corsOptions = {
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      'https://cozy-sprinkles-8053d7.netlify.app',
-      'https://mindgarden-backend-production-0dab.up.railway.app',
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://localhost:5173',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      'http://127.0.0.1:3002',
-      'http://127.0.0.1:5173',
-      'http://localhost:5001',
-      'http://127.0.0.1:5001',
-      'https://*.netlify.app',
-      'https://*.railway.app'
-    ];
-    
-    // Allow all origins in development
-    if (process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    }
-    
-    // In production, check against allowed origins
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      if (!origin) return false; // Skip if origin is undefined
-      
-      // Handle exact matches
-      if (origin === allowedOrigin) return true;
-      
-      // Handle wildcard subdomains (e.g., '*.example.com')
-      if (allowedOrigin.includes('*')) {
-        const [prefix, suffix] = allowedOrigin.split('*');
-        return origin.endsWith(suffix) && 
-               (prefix === '' || origin.startsWith(prefix));
-      }
-      
-      return false;
-    });
-    
-    if (!isAllowed) {
-      console.log('CORS blocked origin:', origin);
-      const msg = `The CORS policy for this site does not allow access from ${origin}.`;
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true,
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'Access-Control-Allow-Headers',
-    'Access-Control-Request-Method',
-    'Access-Control-Request-Headers',
-    'X-Access-Token',
-    'X-Refresh-Token'
-  ],
-  exposedHeaders: [
-    'Authorization',
-    'X-Access-Token',
-    'X-Refresh-Token',
-    'Content-Length',
-    'Content-Type'
-  ],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
@@ -158,6 +92,7 @@ mongoose.connection.on('disconnected', () => {
 connectDB();
 
 // API Routes with /api prefix
+app.use(cors(corsOptions));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/moods', moodRoutes);
@@ -168,9 +103,9 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/garden', gardenRoutes);
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+// Health check endpoint (public access)
+app.get('/api/health', cors(healthCheckCors), (req, res) => {
+  res.status(200).json({ success: true, message: 'Server is healthy' });
 });
 
 // Error handling middleware
