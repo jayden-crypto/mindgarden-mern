@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'https://mindgarden-backend-production.up.railway.app/api',
+  baseURL: 'https://mindgarden-backend.onrender.com/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
