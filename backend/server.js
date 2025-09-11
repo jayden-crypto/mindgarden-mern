@@ -104,7 +104,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/garden', gardenRoutes);
 
 // Health check endpoint (public access)
-app.get('/api/health', cors(healthCheckCors), (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'Server is healthy' });
 });
 
