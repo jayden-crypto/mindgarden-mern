@@ -24,6 +24,9 @@ const gardenRoutes = require('./routes/garden');
 
 const app = express();
 
+// Trust first proxy (required for Railway)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 // CORS configuration
@@ -100,7 +103,11 @@ app.options('*', cors(corsOptions));
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
+  keyGenerator: (req) => {
+    // Use the X-Forwarded-For header since we're behind a proxy
+    return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  }
 });
 app.use(limiter);
 
