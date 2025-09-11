@@ -29,18 +29,33 @@ app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
-// Simple CORS configuration for all routes (temporary for debugging)
+// CORS configuration
+const allowedOrigins = [
+  'https://cozy-sprinkles-8053d7.netlify.app',
+  'http://localhost:3000',
+  'http://localhost:3001'
+];
+
 const corsOptions = {
-  origin: '*',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200
 };
 
+// Apply CORS with the configuration
 app.use(cors(corsOptions));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
+app.options('*', cors(corsOptions)); // Enable preflight for all routes
 
 // Rate limiting
 const limiter = rateLimit({
