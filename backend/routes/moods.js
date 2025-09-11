@@ -85,10 +85,15 @@ router.post('/', auth, [
   }
 });
 
-// Get mood history
+// Get mood history with field selection and pagination
 router.get('/', auth, async (req, res) => {
   try {
-    const { page = 1, limit = 20, startDate, endDate } = req.query;
+    const { page = 1, limit = 5, fields, startDate, endDate } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Default fields to return if none specified
+    const defaultFields = 'mood intensity createdAt notes';
+    const selectedFields = fields || defaultFields;
     
     const query = { userId: req.user._id };
     
@@ -98,13 +103,15 @@ router.get('/', auth, async (req, res) => {
       if (endDate) query.createdAt.$lte = new Date(endDate);
     }
 
-    const moods = await Mood.find(query)
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .select('-encryptedNotes'); // Don't send encrypted notes
-
-    const total = await Mood.countDocuments(query);
+    const [moods, total] = await Promise.all([
+      Mood.find(query)
+        .select(selectedFields)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Mood.countDocuments(query)
+    ]);
 
     res.json({
       moods,

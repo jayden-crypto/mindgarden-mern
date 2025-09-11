@@ -80,10 +80,23 @@ router.post('/', auth, authorize('student'), [
   }
 });
 
-// Get bookings (role-based)
+// Get all bookings (admin/counselor) or user's own bookings (student)
 router.get('/', auth, async (req, res) => {
   try {
-    const { status, page = 1, limit = 10 } = req.query;
+    const { 
+      page = 1, 
+      limit = 10, 
+      fields,
+      status,
+      startDate,
+      endDate 
+    } = req.query;
+    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Default fields to return if none specified
+    const defaultFields = 'sessionDate sessionTime status counselor student reason';
+    const selectedFields = fields || defaultFields;
     
     let query = {};
     
@@ -97,14 +110,17 @@ router.get('/', auth, async (req, res) => {
       query.status = status;
     }
 
-    const bookings = await Booking.find(query)
-      .populate('student', 'name email profile')
-      .populate('counselor', 'name email profile')
-      .sort({ sessionDate: -1, sessionTime: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    const total = await Booking.countDocuments(query);
+    const [bookings, total] = await Promise.all([
+      Booking.find(query)
+        .select(selectedFields)
+        .populate('counselor', 'name email')
+        .populate('student', 'name email')
+        .sort({ sessionDate: 1, sessionTime: 1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Booking.countDocuments(query)
+    ]);
 
     res.json({
       bookings,
