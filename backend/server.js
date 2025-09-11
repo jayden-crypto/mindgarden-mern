@@ -56,11 +56,19 @@ const corsOptions = {
     
     // In production, check against allowed origins
     const isAllowed = allowedOrigins.some(allowedOrigin => {
-      return (
-        origin === allowedOrigin ||
-        (allowedOrigin.includes('*') && 
-         origin.endsWith(allowedOrigin.split('*')[1]))
-      );
+      if (!origin) return false; // Skip if origin is undefined
+      
+      // Handle exact matches
+      if (origin === allowedOrigin) return true;
+      
+      // Handle wildcard subdomains (e.g., '*.example.com')
+      if (allowedOrigin.includes('*')) {
+        const [prefix, suffix] = allowedOrigin.split('*');
+        return origin.endsWith(suffix) && 
+               (prefix === '' || origin.startsWith(prefix));
+      }
+      
+      return false;
     });
     
     if (!isAllowed) {
